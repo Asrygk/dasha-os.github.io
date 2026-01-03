@@ -1,0 +1,2307 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dasha Fresh Meat OS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0c2461 0%, #1e3799 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .desktop {
+            width: 100%;
+            max-width: 1400px;
+            height: 95vh;
+            background: url('https://images.unsplash.com/photo-1516035069371-29a1b244cc32?ixlib=rb-4.0.3&auto=format&fit=crop&w=1630&q=80') no-repeat center center;
+            background-size: cover;
+            border-radius: 10px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Панель задач Windows 7 - ФИКСИРОВАНА ВНИЗУ */
+        .taskbar {
+            background: linear-gradient(to bottom, #2c3e50 0%, #1a1a2e 100%);
+            height: 48px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            border-top: 1px solid #4a69bd;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+        }
+
+        .start-button {
+            background: linear-gradient(to bottom, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 18px;
+            font-weight: bold;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+            margin-right: 15px;
+            transition: all 0.2s;
+        }
+
+        .start-button:hover {
+            background: linear-gradient(to bottom, #ff5252 0%, #e74c3c 100%);
+            transform: translateY(-1px);
+        }
+
+        .start-button i {
+            margin-right: 10px;
+            font-size: 18px;
+        }
+
+        .taskbar-items {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 0 5px;
+        }
+
+        .taskbar-items::-webkit-scrollbar {
+            height: 3px;
+        }
+
+        .taskbar-items::-webkit-scrollbar-thumb {
+            background: rgba(255, 107, 107, 0.5);
+            border-radius: 3px;
+        }
+
+        .taskbar-item {
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            border-radius: 4px;
+            padding: 6px 15px;
+            margin-right: 8px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .taskbar-item:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .taskbar-item.active {
+            background: rgba(255, 107, 107, 0.2);
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .taskbar-item i {
+            margin-right: 8px;
+        }
+
+        .system-tray {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .tray-icon {
+            margin-right: 15px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 3px;
+        }
+
+        .tray-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .time {
+            margin-right: 10px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* Рабочий стол - ОТСТУП СНИЗУ ДЛЯ ПАНЕЛИ ЗАДАЧ */
+        .desktop-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 48px; /* Место для панели задач */
+            overflow: hidden;
+        }
+
+        .desktop-icons {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 85px;
+            margin-bottom: 25px;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            animation: iconAppear 0.5s ease-out;
+            animation-fill-mode: both;
+            user-select: none;
+        }
+
+        @keyframes iconAppear {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .desktop-icon:nth-child(1) { animation-delay: 0.1s; }
+        .desktop-icon:nth-child(2) { animation-delay: 0.2s; }
+        .desktop-icon:nth-child(3) { animation-delay: 0.3s; }
+        .desktop-icon:nth-child(4) { animation-delay: 0.4s; }
+        .desktop-icon:nth-child(5) { animation-delay: 0.5s; }
+        .desktop-icon:nth-child(6) { animation-delay: 0.6s; }
+        .desktop-icon:nth-child(7) { animation-delay: 0.7s; }
+
+        .desktop-icon:hover {
+            background: rgba(255, 107, 107, 0.3);
+            transform: scale(1.1) translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .desktop-icon.selected {
+            background: rgba(255, 107, 107, 0.4);
+            box-shadow: 0 0 15px rgba(255, 107, 107, 0.5);
+            transform: scale(1.05);
+        }
+
+        .desktop-icon i {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .desktop-icon span {
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        /* Окна приложений */
+        .window {
+            position: absolute;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 100;
+            min-width: 400px;
+            min-height: 300px;
+            border: 1px solid #ddd;
+            opacity: 0;
+            transform: scale(0.9) translateY(20px);
+            transition: opacity 0.3s, transform 0.3s;
+        }
+
+        .window.active {
+            display: flex;
+            z-index: 200;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            animation: windowOpen 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes windowOpen {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .window.closing {
+            animation: windowClose 0.3s ease-in forwards;
+        }
+
+        @keyframes windowClose {
+            0% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.8) translateY(30px);
+            }
+        }
+
+        .window-header {
+            background: linear-gradient(to right, #2c3e50 0%, #1a1a2e 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            user-select: none;
+        }
+
+        .window-title {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .window-title i {
+            margin-right: 10px;
+            color: #ff6b6b;
+        }
+
+        .window-controls {
+            display: flex;
+        }
+
+        .window-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            margin-left: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+
+        .window-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .window-btn.close:hover {
+            background: #e74c3c;
+            transform: rotate(90deg) scale(1.1);
+        }
+
+        .window-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow: auto;
+            background: #f8f9fa;
+        }
+
+        /* Меню Пуск */
+        .start-menu {
+            position: absolute;
+            bottom: 48px;
+            left: 10px;
+            width: 500px;
+            height: 600px;
+            background: linear-gradient(to bottom, #2c3e50 0%, #1a1a2e 100%);
+            border-radius: 10px 10px 0 0;
+            box-shadow: 0 -5px 30px rgba(0, 0, 0, 0.5);
+            display: none;
+            flex-direction: column;
+            z-index: 500;
+            overflow: hidden;
+            transform-origin: bottom left;
+        }
+
+        .start-menu.active {
+            display: flex;
+            animation: startMenuOpen 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes startMenuOpen {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .start-header {
+            background: linear-gradient(to right, #ff6b6b 0%, #ee5a52 100%);
+            padding: 25px;
+            color: white;
+            display: flex;
+            align-items: center;
+        }
+
+        .start-logo {
+            width: 70px;
+            height: 70px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            color: #ff6b6b;
+            font-size: 30px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: logoSpin 20s linear infinite;
+        }
+
+        @keyframes logoSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .start-user {
+            flex-grow: 1;
+        }
+
+        .start-user h2 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-user p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .start-content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .start-left {
+            width: 70%;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .start-app {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            color: white;
+            transform: translateX(-20px);
+            opacity: 0;
+            animation: startAppSlide 0.5s forwards;
+            user-select: none;
+        }
+
+        @keyframes startAppSlide {
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .start-left .start-app:nth-child(1) { animation-delay: 0.1s; }
+        .start-left .start-app:nth-child(2) { animation-delay: 0.15s; }
+        .start-left .start-app:nth-child(3) { animation-delay: 0.2s; }
+        .start-left .start-app:nth-child(4) { animation-delay: 0.25s; }
+        .start-left .start-app:nth-child(5) { animation-delay: 0.3s; }
+        .start-left .start-app:nth-child(6) { animation-delay: 0.35s; }
+        .start-left .start-app:nth-child(7) { animation-delay: 0.4s; }
+        .start-left .start-app:nth-child(8) { animation-delay: 0.45s; }
+
+        .start-app:hover {
+            background: rgba(255, 107, 107, 0.2);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .start-app i {
+            font-size: 24px;
+            margin-right: 15px;
+            color: #ff6b6b;
+            width: 30px;
+            text-align: center;
+        }
+
+        .start-right {
+            width: 30%;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .start-section {
+            margin-bottom: 25px;
+            transform: translateY(20px);
+            opacity: 0;
+            animation: startSectionAppear 0.5s forwards;
+        }
+
+        .start-section:nth-child(1) { animation-delay: 0.2s; }
+        .start-section:nth-child(2) { animation-delay: 0.3s; }
+        .start-section:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes startSectionAppear {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .start-section h3 {
+            color: #ff6b6b;
+            font-size: 16px;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .start-link {
+            display: block;
+            color: white;
+            padding: 8px 0;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 14px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .start-link:hover {
+            color: #ff6b6b;
+            padding-left: 10px;
+            transform: scale(1.05);
+        }
+
+        .start-link i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Контекстное меню */
+        .context-menu {
+            position: absolute;
+            background: linear-gradient(to bottom, #2c3e50 0%, #1a1a2e 100%);
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            padding: 10px 0;
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            min-width: 200px;
+            animation: contextMenuAppear 0.2s ease-out;
+        }
+
+        @keyframes contextMenuAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .context-menu.active {
+            display: flex;
+        }
+
+        .context-item {
+            padding: 12px 20px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            user-select: none;
+        }
+
+        .context-item:hover {
+            background: rgba(255, 107, 107, 0.3);
+            padding-left: 25px;
+        }
+
+        .context-item i {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Стили для содержимого окон */
+        .app-content {
+            height: 100%;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 20px;
+        }
+
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 15px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            user-select: none;
+        }
+
+        .app-icon:hover {
+            background: #e9ecef;
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-icon i {
+            font-size: 36px;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .app-icon span {
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* Панель управления Windows 7 */
+        .control-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .control-item {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid #e0e0e0;
+            user-select: none;
+        }
+
+        .control-item:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            border-color: #ff6b6b;
+        }
+
+        .control-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 22px;
+        }
+
+        .control-info h3 {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .control-info p {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* Окно о системе */
+        .system-info {
+            padding: 20px;
+        }
+
+        .system-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .system-logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 25px;
+            color: white;
+            font-size: 36px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .system-text h2 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .system-text p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .system-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .detail-item {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #ff6b6b;
+            transition: all 0.3s;
+        }
+
+        .detail-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-item h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .detail-item p {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* Уведомления */
+        .notification {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            max-width: 350px;
+            z-index: 300;
+            display: none;
+            border-left: 5px solid #ff6b6b;
+            transform: translateX(100%);
+        }
+
+        .notification.active {
+            display: flex;
+            animation: slideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes slideIn {
+            0% { transform: translateX(100%); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .notification.closing {
+            animation: slideOut 0.3s ease-in forwards;
+        }
+
+        @keyframes slideOut {
+            0% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%); opacity: 0; }
+        }
+
+        .notification i {
+            font-size: 24px;
+            color: #ff6b6b;
+            margin-right: 15px;
+            animation: bellRing 0.5s ease-in-out;
+        }
+
+        @keyframes bellRing {
+            0%, 100% { transform: rotate(0); }
+            25% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+
+        .notification-content h4 {
+            font-size: 16px;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .notification-content p {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Контекст рабочего стола */
+        .desktop-context {
+            position: absolute;
+            z-index: 50;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 48px;
+        }
+
+        /* Стили для конкретных окон */
+        .file-explorer {
+            display: flex;
+            height: 100%;
+        }
+
+        .file-sidebar {
+            width: 200px;
+            background: #f1f3f4;
+            border-right: 1px solid #ddd;
+            padding: 15px 0;
+        }
+
+        .file-content {
+            flex: 1;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .browser-content {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .browser-nav {
+            display: flex;
+            padding: 10px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #ddd;
+            align-items: center;
+        }
+
+        .browser-url {
+            flex: 1;
+            margin: 0 10px;
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .browser-page {
+            flex: 1;
+            padding: 20px;
+            background: white;
+        }
+
+        .media-player {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .media-controls {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+        }
+
+        .media-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+        }
+
+        /* Анимация загрузки */
+        .loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 10000;
+        }
+
+        .loader.active {
+            display: block;
+        }
+
+        .loader-circle {
+            width: 80px;
+            height: 80px;
+            border: 8px solid rgba(255, 107, 107, 0.2);
+            border-top: 8px solid #ff6b6b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Калькулятор */
+        .calc-btn {
+            padding: 15px;
+            font-size: 18px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .calc-btn:hover {
+            background: #f0f0f0;
+            transform: scale(1.05);
+        }
+
+        /* Адаптивность */
+        @media (max-height: 850px) {
+            .start-menu {
+                height: 500px;
+            }
+            
+            .desktop {
+                height: 90vh;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .desktop {
+                max-width: 100%;
+                height: 90vh;
+            }
+            
+            .start-menu {
+                width: 400px;
+                height: 500px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Рабочий стол -->
+    <div class="desktop">
+        <!-- Лоадер -->
+        <div class="loader" id="loader">
+            <div class="loader-circle"></div>
+        </div>
+        
+        <!-- Область рабочего стола (без панели задач) -->
+        <div class="desktop-area" id="desktop-area">
+            <!-- Контекстное меню рабочего стола -->
+            <div class="desktop-context" id="desktop-context"></div>
+            
+            <!-- Иконки рабочего стола -->
+            <div class="desktop-icons">
+                <div class="desktop-icon" data-window="system">
+                    <i class="fas fa-desktop"></i>
+                    <span>Этот компьютер</span>
+                </div>
+                <div class="desktop-icon" data-window="documents">
+                    <i class="fas fa-folder"></i>
+                    <span>Документы</span>
+                </div>
+                <div class="desktop-icon" data-window="browser">
+                    <i class="fas fa-globe"></i>
+                    <span>Интернет</span>
+                </div>
+                <div class="desktop-icon" data-window="media">
+                    <i class="fas fa-photo-video"></i>
+                    <span>Медиа</span>
+                </div>
+                <div class="desktop-icon" data-window="vladik">
+                    <i class="fas fa-user-tie"></i>
+                    <span>Владик</span>
+                </div>
+                <div class="desktop-icon" data-window="control-panel">
+                    <i class="fas fa-cog"></i>
+                    <span>Панель управления</span>
+                </div>
+                <div class="desktop-icon" data-window="trash">
+                    <i class="fas fa-trash-alt"></i>
+                    <span>Корзина</span>
+                </div>
+            </div>
+
+            <!-- Уведомление -->
+            <div class="notification" id="notification">
+                <i class="fas fa-bell"></i>
+                <div class="notification-content">
+                    <h4>Добро пожаловать!</h4>
+                    <p>Вы вошли в Dasha Fresh Meat OS. Начните работу с меню "Пуск".</p>
+                </div>
+            </div>
+
+            <!-- Контекстное меню -->
+            <div class="context-menu" id="context-menu">
+                <div class="context-item" data-action="new-file">
+                    <i class="fas fa-file"></i> Создать
+                </div>
+                <div class="context-item" data-action="refresh">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </div>
+                <div class="context-item" data-action="personalize">
+                    <i class="fas fa-palette"></i> Персонализация
+                </div>
+                <div class="context-item" data-action="view">
+                    <i class="fas fa-eye"></i> Вид
+                </div>
+                <div class="context-item" data-action="sort">
+                    <i class="fas fa-sort-alpha-down"></i> Упорядочить
+                </div>
+                <div class="context-item" data-action="settings">
+                    <i class="fas fa-sliders-h"></i> Параметры
+                </div>
+            </div>
+
+            <!-- Меню Пуск -->
+            <div class="start-menu" id="start-menu">
+                <div class="start-header">
+                    <div class="start-logo">D</div>
+                    <div class="start-user">
+                        <h2>Dasha Fresh Meat OS</h2>
+                        <p>Версия 2.0 | Сборка 2023.07.15</p>
+                    </div>
+                </div>
+                <div class="start-content">
+                    <div class="start-left">
+                        <div class="start-app" data-window="system">
+                            <i class="fas fa-desktop"></i>
+                            <div>
+                                <h3>Этот компьютер</h3>
+                                <p>Доступ к дискам и устройствам</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="documents">
+                            <i class="fas fa-folder"></i>
+                            <div>
+                                <h3>Документы</h3>
+                                <p>Личные файлы и папки</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="browser">
+                            <i class="fas fa-globe"></i>
+                            <div>
+                                <h3>Интернет Explorer</h3>
+                                <p>Веб-браузер</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="vladik">
+                            <i class="fas fa-user-tie"></i>
+                            <div>
+                                <h3>Владик</h3>
+                                <p>Персональный помощник</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="media">
+                            <i class="fas fa-photo-video"></i>
+                            <div>
+                                <h3>Медиа проигрыватель</h3>
+                                <p>Музыка и видео</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="control-panel">
+                            <i class="fas fa-cog"></i>
+                            <div>
+                                <h3>Панель управления</h3>
+                                <p>Настройки системы</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="calculator">
+                            <i class="fas fa-calculator"></i>
+                            <div>
+                                <h3>Калькулятор</h3>
+                                <p>Простой и инженерный</p>
+                            </div>
+                        </div>
+                        <div class="start-app" data-window="notepad">
+                            <i class="fas fa-edit"></i>
+                            <div>
+                                <h3>Блокнот</h3>
+                                <p>Текстовый редактор</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="start-right">
+                        <div class="start-section">
+                            <h3>Владик</h3>
+                            <a class="start-link" data-window="vladik">
+                                <i class="fas fa-user-circle"></i> Мой профиль
+                            </a>
+                            <a class="start-link" data-window="documents">
+                                <i class="fas fa-file"></i> Документы
+                            </a>
+                            <a class="start-link" data-action="photos">
+                                <i class="fas fa-images"></i> Изображения
+                            </a>
+                            <a class="start-link" data-window="media">
+                                <i class="fas fa-music"></i> Музыка
+                            </a>
+                        </div>
+                        <div class="start-section">
+                            <h3>Система</h3>
+                            <a class="start-link" data-window="system">
+                                <i class="fas fa-desktop"></i> Этот компьютер
+                            </a>
+                            <a class="start-link" data-window="control-panel">
+                                <i class="fas fa-cog"></i> Панель управления
+                            </a>
+                            <a class="start-link" data-window="help">
+                                <i class="fas fa-question-circle"></i> Справка
+                            </a>
+                            <a class="start-link" data-action="search">
+                                <i class="fas fa-search"></i> Поиск
+                            </a>
+                        </div>
+                        <div class="start-section">
+                            <h3>Завершение работы</h3>
+                            <a class="start-link" data-action="shutdown">
+                                <i class="fas fa-power-off"></i> Выключение
+                            </a>
+                            <a class="start-link" data-action="restart">
+                                <i class="fas fa-redo"></i> Перезагрузка
+                            </a>
+                            <a class="start-link" data-action="logout">
+                                <i class="fas fa-sign-out-alt"></i> Выход
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Все окна приложений -->
+            <!-- Окно "Этот компьютер" -->
+            <div class="window" id="system-window" style="width: 700px; height: 500px; top: 100px; left: 200px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-desktop"></i> Этот компьютер
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('system')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('system')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('system')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="system-info">
+                        <div class="system-header">
+                            <div class="system-logo">D</div>
+                            <div class="system-text">
+                                <h2>Dasha Fresh Meat OS</h2>
+                                <p>Специальная сборка "Владик Edition"</p>
+                            </div>
+                        </div>
+                        <div class="system-details">
+                            <div class="detail-item">
+                                <h4>Издание</h4>
+                                <p>Dasha Fresh Meat Pro</p>
+                            </div>
+                            <div class="detail-item">
+                                <h4>Версия</h4>
+                                <p>2.0 (Сборка 2023.07.15)</p>
+                            </div>
+                            <div class="detail-item">
+                                <h4>Установлено ОЗУ</h4>
+                                <p>16,0 ГБ</p>
+                            </div>
+                            <div class="detail-item">
+                                <h4>Процессор</h4>
+                                <p>Intel® Core™ i7-12700K</p>
+                            </div>
+                            <div class="detail-item">
+                                <h4>Тип системы</h4>
+                                <p>64-разрядная ОС</p>
+                            </div>
+                            <div class="detail-item">
+                                <h4>Имя компьютера</h4>
+                                <p>VLADIK-PC</p>
+                            </div>
+                        </div>
+                        <div class="app-grid" style="margin-top: 30px;">
+                            <div class="app-icon" onclick="showNotification('Открытие диска C:\\', 'Файловая система')">
+                                <i class="fas fa-hdd"></i>
+                                <span>Локальный диск (C:)</span>
+                            </div>
+                            <div class="app-icon" onclick="showNotification('Открытие диска D:\\', 'Файловая система')">
+                                <i class="fas fa-hdd"></i>
+                                <span>Локальный диск (D:)</span>
+                            </div>
+                            <div class="app-icon" onclick="showNotification('Открытие DVD-дисковода', 'Устройства')">
+                                <i class="fas fa-compact-disc"></i>
+                                <span>DVD-дисковод (E:)</span>
+                            </div>
+                            <div class="app-icon" onclick="openWindow('documents')">
+                                <i class="fas fa-folder"></i>
+                                <span>Документы</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Документы" -->
+            <div class="window" id="documents-window" style="width: 800px; height: 550px; top: 80px; left: 250px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-folder"></i> Документы
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('documents')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('documents')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('documents')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="file-explorer">
+                        <div class="file-sidebar">
+                            <div style="padding: 15px 20px; font-weight: bold; color: #2c3e50; border-bottom: 1px solid #ddd;">
+                                <i class="fas fa-folder" style="margin-right: 10px; color: #ff6b6b;"></i>Быстрый доступ
+                            </div>
+                            <div style="padding: 10px 20px; cursor: pointer;" onclick="showNotification('Загрузка недавних документов...', 'Документы')">
+                                <i class="fas fa-clock" style="margin-right: 10px; color: #666;"></i>Недавние
+                            </div>
+                            <div style="padding: 10px 20px; cursor: pointer;" onclick="showNotification('Загрузка рабочего стола...', 'Документы')">
+                                <i class="fas fa-desktop" style="margin-right: 10px; color: #666;"></i>Рабочий стол
+                            </div>
+                            <div style="padding: 10px 20px; cursor: pointer; background: #e9ecef;" onclick="showNotification('Вы уже в документах', 'Документы')">
+                                <i class="fas fa-folder-open" style="margin-right: 10px; color: #ff6b6b;"></i>Документы
+                            </div>
+                            <div style="padding: 10px 20px; cursor: pointer;" onclick="showNotification('Загрузка изображений...', 'Документы')">
+                                <i class="fas fa-images" style="margin-right: 10px; color: #666;"></i>Изображения
+                            </div>
+                            <div style="padding: 10px 20px; cursor: pointer;" onclick="showNotification('Загрузка музыки...', 'Документы')">
+                                <i class="fas fa-music" style="margin-right: 10px; color: #666;"></i>Музыка
+                            </div>
+                        </div>
+                        <div class="file-content">
+                            <h3 style="margin-bottom: 20px; color: #2c3e50;"><i class="fas fa-folder-open" style="color: #ff6b6b; margin-right: 10px;"></i>Мои документы</h3>
+                            <div class="app-grid">
+                                <div class="app-icon" onclick="showNotification('Открытие файла "Отчет по Владику.docx"', 'Документы')">
+                                    <i class="fas fa-file-word" style="color: #2b579a;"></i>
+                                    <span>Отчет по Владику</span>
+                                </div>
+                                <div class="app-icon" onclick="showNotification('Открытие файла "Dasha Fresh Meat.pptx"', 'Документы')">
+                                    <i class="fas fa-file-powerpoint" style="color: #d24726;"></i>
+                                    <span>Dasha Fresh Meat</span>
+                                </div>
+                                <div class="app-icon" onclick="showNotification('Открытие файла "Финансы.xlsx"', 'Документы')">
+                                    <i class="fas fa-file-excel" style="color: #217346;"></i>
+                                    <span>Финансы</span>
+                                </div>
+                                <div class="app-icon" onclick="showNotification('Открытие папки "Фото Владика"', 'Документы')">
+                                    <i class="fas fa-folder" style="color: #ffb347;"></i>
+                                    <span>Фото Владика</span>
+                                </div>
+                                <div class="app-icon" onclick="showNotification('Создание нового документа', 'Документы')">
+                                    <i class="fas fa-plus-circle" style="color: #4a69bd;"></i>
+                                    <span>Новый документ</span>
+                                </div>
+                                <div class="app-icon" onclick="showNotification('Открытие папки "Музыка Dasha Fresh Meat"', 'Документы')">
+                                    <i class="fas fa-folder" style="color: #6c5ce7;"></i>
+                                    <span>Музыка Dasha Fresh Meat</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Интернет" -->
+            <div class="window" id="browser-window" style="width: 850px; height: 600px; top: 70px; left: 300px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-globe"></i> Интернет Explorer - Dasha Fresh Meat OS
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('browser')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('browser')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('browser')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="browser-content">
+                        <div class="browser-nav">
+                            <button class="browser-btn" onclick="showNotification('Назад', 'Браузер')">
+                                <i class="fas fa-arrow-left"></i>
+                            </button>
+                            <button class="browser-btn" onclick="showNotification('Вперед', 'Браузер')">
+                                <i class="fas fa-arrow-right"></i>
+                            </button>
+                            <button class="browser-btn" onclick="showNotification('Обновление страницы...', 'Браузер')">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <input type="text" class="browser-url" value="https://dasha-fresh-meat-os.com/vladik" readonly>
+                            <button class="browser-btn go" onclick="showNotification('Переход по ссылке...', 'Браузер')">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="browser-page">
+                            <h2 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px;">
+                                <i class="fas fa-heart" style="color: #ff6b6b;"></i> Dasha Fresh Meat OS - Официальный сайт
+                            </h2>
+                            <div style="background: linear-gradient(to right, #ff6b6b, #ee5a52); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                                <h3><i class="fas fa-crown"></i> Специальная версия "Владик Edition"</h3>
+                                <p>Уникальная операционная система с персональным помощником Владиком</p>
+                            </div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-top: 20px;">
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4a69bd;">
+                                    <h4><i class="fas fa-star" style="color: #ffb347;"></i> Новые возможности</h4>
+                                    <p>• Ассистент Владик с ИИ</p>
+                                    <p>• Улучшенный интерфейс Windows 10/7</p>
+                                    <p>• Встроенные инструменты для продуктивности</p>
+                                </div>
+                                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #ff6b6b;">
+                                    <h4><i class="fas fa-download" style="color: #4a69bd;"></i> Загрузки</h4>
+                                    <p>• Обновление до версии 2.1</p>
+                                    <p>• Дополнительные темы</p>
+                                    <p>• Расширения для Владика</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Медиа" -->
+            <div class="window" id="media-window" style="width: 700px; height: 500px; top: 120px; left: 350px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-photo-video"></i> Медиа проигрыватель
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('media')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('media')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('media')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="media-player">
+                        <div class="media-content">
+                            <div style="text-align: center;">
+                                <div style="font-size: 80px; color: #ff6b6b; margin-bottom: 20px;">
+                                    <i class="fas fa-music"></i>
+                                </div>
+                                <h3 style="color: #2c3e50; margin-bottom: 10px;">Dasha Fresh Meat OST</h3>
+                                <p style="color: #666; margin-bottom: 30px;">Сейчас играет: "Владик и Даша - Главная тема"</p>
+                                <div style="width: 100%; height: 10px; background: #ddd; border-radius: 5px; margin-bottom: 30px;">
+                                    <div style="width: 65%; height: 100%; background: #ff6b6b; border-radius: 5px;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="media-controls">
+                            <button class="media-btn" onclick="showNotification('Перемотка назад', 'Медиа')">
+                                <i class="fas fa-backward"></i>
+                            </button>
+                            <button class="media-btn play" onclick="showNotification('Воспроизведение/пауза', 'Медиа')">
+                                <i class="fas fa-play"></i>
+                            </button>
+                            <button class="media-btn" onclick="showNotification('Перемотка вперед', 'Медиа')">
+                                <i class="fas fa-forward"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Владик" -->
+            <div class="window" id="vladik-window" style="width: 650px; height: 450px; top: 150px; left: 400px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-user-tie"></i> Владик - Персональный помощник
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('vladik')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('vladik')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('vladik')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="width: 120px; height: 120px; background: linear-gradient(135deg, #4a69bd 0%, #1e3799 100%); border-radius: 50%; display: inline-flex; justify-content: center; align-items: center; margin-bottom: 25px; animation: float 3s ease-in-out infinite;">
+                            <i class="fas fa-user-tie" style="font-size: 50px; color: white;"></i>
+                        </div>
+                        <h2 style="color: #2c3e50; margin-bottom: 15px;">Владик</h2>
+                        <p style="color: #666; margin-bottom: 25px; font-size: 16px;">Ваш персональный помощник в Dasha Fresh Meat OS</p>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 30px;">
+                            <div class="vladik-card" onclick="showNotification('Загрузка расписания Владика...', 'Владик')">
+                                <h4 style="color: #2c3e50; margin-bottom: 10px;"><i class="fas fa-calendar-alt" style="color: #ff6b6b; margin-right: 8px;"></i> Расписание</h4>
+                                <p style="color: #666; font-size: 14px;">Встреча с Дасей: 15:00</p>
+                            </div>
+                            <div class="vladik-card" onclick="showNotification('Загрузка задач Владика...', 'Владик')">
+                                <h4 style="color: #2c3e50; margin-bottom: 10px;"><i class="fas fa-tasks" style="color: #ff6b6b; margin-right: 8px;"></i> Задачи</h4>
+                                <p style="color: #666; font-size: 14px;">3 активные задачи</p>
+                            </div>
+                            <div class="vladik-card" onclick="showNotification('Загрузка документов Владика...', 'Владик')">
+                                <h4 style="color: #2c3e50; margin-bottom: 10px;"><i class="fas fa-file" style="color: #ff6b6b; margin-right: 8px;"></i> Документы</h4>
+                                <p style="color: #666; font-size: 14px;">12 недавних файлов</p>
+                            </div>
+                            <div class="vladik-card" onclick="showNotification('Настройки Владика...', 'Владик')">
+                                <h4 style="color: #2c3e50; margin-bottom: 10px;"><i class="fas fa-cog" style="color: #ff6b6b; margin-right: 8px;"></i> Настройки</h4>
+                                <p style="color: #666; font-size: 14px;">Персонализация ОС</p>
+                            </div>
+                        </div>
+                        
+                        <button class="vladik-activate-btn" onclick="showNotification('Владик активирован. Привет! Чем могу помочь?', 'Владик')">
+                            <i class="fas fa-robot"></i> Активировать Владика
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Панель управления" -->
+            <div class="window" id="control-panel-window" style="width: 800px; height: 550px; top: 80px; left: 300px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-cog"></i> Панель управления
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('control-panel')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('control-panel')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('control-panel')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div class="control-panel">
+                        <div class="control-item" onclick="showNotification('Открытие параметров системы...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Система и безопасность</h3>
+                                <p>Брандмауэр, обновления</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров сети...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-network-wired"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Сеть и Интернет</h3>
+                                <p>Wi-Fi, Ethernet, VPN</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров оборудования...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-desktop"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Оборудование и звук</h3>
+                                <p>Устройства, принтеры</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров учетных записей...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Учетные записи</h3>
+                                <p>Пользователи, семья</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров внешнего вида...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Персонализация</h3>
+                                <p>Обои, темы, цвета</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров времени...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Время и язык</h3>
+                                <p>Регион, дата, язык</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие специальных возможностей...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-universal-access"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Специальные возможности</h3>
+                                <p>Экранный диктор, лупа</p>
+                            </div>
+                        </div>
+                        <div class="control-item" onclick="showNotification('Открытие параметров конфиденциальности...', 'Панель управления')">
+                            <div class="control-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <div class="control-info">
+                                <h3>Конфиденциальность</h3>
+                                <p>Камера, микрофон, данные</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Корзина" -->
+            <div class="window" id="trash-window" style="width: 600px; height: 450px; top: 130px; left: 450px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-trash-alt"></i> Корзина
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('trash')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('trash')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('trash')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div style="text-align: center; padding: 40px;">
+                        <div style="font-size: 80px; color: #ff6b6b; margin-bottom: 30px;">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">Корзина пуста</h3>
+                        <p style="color: #666; margin-bottom: 30px;">Удаленные файлы будут появляться здесь</p>
+                        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 20px; text-align: left;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;"><i class="fas fa-info-circle" style="color: #4a69bd;"></i> Информация о корзине</h4>
+                            <p style="color: #666; font-size: 14px;">• Размер: 0 байт из 10 ГБ</p>
+                            <p style="color: #666; font-size: 14px;">• Файлов: 0</p>
+                            <p style="color: #666; font-size: 14px;">• Папок: 0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Калькулятор" -->
+            <div class="window" id="calculator-window" style="width: 350px; height: 450px; top: 100px; left: 500px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-calculator"></i> Калькулятор
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('calculator')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('calculator')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('calculator')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div style="text-align: center; padding: 20px;">
+                        <input type="text" readonly style="width: 100%; padding: 15px; font-size: 24px; text-align: right; border: 2px solid #ddd; border-radius: 8px; margin-bottom: 20px; background: white;" value="0" id="calc-display">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+                            <button class="calc-btn" data-val="C" style="background: #ff6b6b; color: white;">C</button>
+                            <button class="calc-btn" data-val="±" style="background: #f8f9fa;">±</button>
+                            <button class="calc-btn" data-val="%" style="background: #f8f9fa;">%</button>
+                            <button class="calc-btn" data-val="/" style="background: #4a69bd; color: white;">/</button>
+                            
+                            <button class="calc-btn" data-val="7">7</button>
+                            <button class="calc-btn" data-val="8">8</button>
+                            <button class="calc-btn" data-val="9">9</button>
+                            <button class="calc-btn" data-val="*" style="background: #4a69bd; color: white;">×</button>
+                            
+                            <button class="calc-btn" data-val="4">4</button>
+                            <button class="calc-btn" data-val="5">5</button>
+                            <button class="calc-btn" data-val="6">6</button>
+                            <button class="calc-btn" data-val="-" style="background: #4a69bd; color: white;">-</button>
+                            
+                            <button class="calc-btn" data-val="1">1</button>
+                            <button class="calc-btn" data-val="2">2</button>
+                            <button class="calc-btn" data-val="3">3</button>
+                            <button class="calc-btn" data-val="+" style="background: #4a69bd; color: white;">+</button>
+                            
+                            <button class="calc-btn" data-val="0" style="grid-column: span 2;">0</button>
+                            <button class="calc-btn" data-val=".">.</button>
+                            <button class="calc-btn" data-val="=" style="background: #ff6b6b; color: white;">=</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Окно "Блокнот" -->
+            <div class="window" id="notepad-window" style="width: 600px; height: 500px; top: 90px; left: 400px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-edit"></i> Блокнот
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('notepad')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('notepad')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('notepad')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <textarea id="notepad-text" style="width: 100%; height: 100%; border: none; outline: none; resize: none; font-family: 'Courier New', monospace; font-size: 14px; padding: 10px;">Dasha Fresh Meat OS - Блокнот
+=====================================
+
+Добро пожаловать в блокнот Dasha Fresh Meat OS!
+
+Это специальная версия блокнота с интеграцией Владика.
+
+Сегодняшние задачи:
+1. Встреча с Дасой в 15:00
+2. Проверить обновления системы
+3. Подготовить отчет
+
+Заметки Владика:
+- Не забыть про день рождения Даши
+- Купить свежее мясо
+- Настроить напоминания
+
+Дата: <span id="current-date"></span></textarea>
+                </div>
+            </div>
+
+            <!-- Окно "Справка" -->
+            <div class="window" id="help-window" style="width: 650px; height: 500px; top: 110px; left: 350px;">
+                <div class="window-header">
+                    <div class="window-title">
+                        <i class="fas fa-question-circle"></i> Справка Dasha Fresh Meat OS
+                    </div>
+                    <div class="window-controls">
+                        <button class="window-btn" onclick="minimizeWindow('help')"><i class="fas fa-minus"></i></button>
+                        <button class="window-btn" onclick="maximizeWindow('help')"><i class="fas fa-expand"></i></button>
+                        <button class="window-btn close" onclick="closeWindow('help')"><i class="fas fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="window-content">
+                    <div style="padding: 20px;">
+                        <h3 style="color: #2c3e50; margin-bottom: 20px; border-bottom: 2px solid #ff6b6b; padding-bottom: 10px;">
+                            <i class="fas fa-info-circle" style="color: #ff6b6b;"></i> Помощь и поддержка
+                        </h3>
+                        <div style="margin-bottom: 25px;">
+                            <h4><i class="fas fa-book" style="color: #4a69bd;"></i> Основные функции</h4>
+                            <p>• <strong>Владик</strong> - ваш персональный помощник</p>
+                            <p>• <strong>Меню Пуск</strong> - быстрый доступ ко всем приложениям</p>
+                            <p>• <strong>Рабочий стол</strong> - размещайте ярлыки для быстрого доступа</p>
+                        </div>
+                        <div style="margin-bottom: 25px;">
+                            <h4><i class="fas fa-keyboard" style="color: #4a69bd;"></i> Горячие клавиши</h4>
+                            <p>• <kbd>Win</kbd> - открыть/закрыть меню Пуск</p>
+                            <p>• <kbd>Alt + F4</kbd> - закрыть активное окно</p>
+                            <p>• <kbd>Win + D</kbd> - показать рабочий стол</p>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #4a69bd;">
+                            <h4><i class="fas fa-headset" style="color: #ff6b6b;"></i> Техническая поддержка</h4>
+                            <p>По вопросам работы системы обращайтесь:</p>
+                            <p>• Email: support@dasha-fresh-meat-os.com</p>
+                            <p>• Телефон: +7 (800) DASHA-OS</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель задач (ОТДЕЛЬНО ОТ РАБОЧЕГО СТОЛА) -->
+        <div class="taskbar">
+            <button class="start-button" id="start-button" onclick="toggleStartMenu()">
+                <i class="fas fa-windows"></i> Dasha Fresh Meat
+            </button>
+            
+            <div class="taskbar-items" id="taskbar-items">
+                <!-- Активные приложения будут добавляться сюда -->
+            </div>
+            
+            <div class="system-tray">
+                <div class="tray-icon" onclick="showNotification('Регулировка громкости', 'Система')">
+                    <i class="fas fa-volume-up"></i>
+                </div>
+                <div class="tray-icon" onclick="showNotification('Настройки сети', 'Система')">
+                    <i class="fas fa-wifi"></i>
+                </div>
+                <div class="tray-icon" onclick="showNotification('Уровень заряда: 95%', 'Система')">
+                    <i class="fas fa-battery-full"></i>
+                </div>
+                <div class="time" id="current-time">00:00</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ИНИЦИАЛИЗАЦИЯ ПЕРЕМЕННЫХ
+        let activeWindow = null;
+        let openWindows = {};
+        let zIndex = 100;
+        let currentCalcValue = '0';
+        let calcOperator = null;
+        let calcPreviousValue = null;
+        
+        // ИНИЦИАЛИЗАЦИЯ ПРИ ЗАГРУЗКЕ
+        document.addEventListener('DOMContentLoaded', function() {
+            initSystem();
+        });
+        
+        function initSystem() {
+            // Обновление времени
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // Приветственное уведомление
+            setTimeout(() => {
+                showNotification('Добро пожаловать в Dasha Fresh Meat OS! Нажмите "Пуск" для начала работы.', 'Система');
+            }, 1000);
+            
+            // Инициализация всех обработчиков событий
+            initEventHandlers();
+            
+            // Инициализация калькулятора
+            initCalculator();
+            
+            // Инициализация перетаскиваемых окон
+            initDraggableWindows();
+        }
+        
+        // ОБНОВЛЕНИЕ ВРЕМЕНИ
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ru-RU', {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('current-time').textContent = timeString;
+            
+            // Обновление даты в блокноте
+            const dateString = now.toLocaleDateString('ru-RU', {day: 'numeric', month: 'long', year: 'numeric'});
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                dateElement.textContent = dateString;
+            }
+        }
+        
+        // УВЕДОМЛЕНИЯ
+        function showNotification(message, title = 'Уведомление') {
+            const notification = document.getElementById('notification');
+            const notificationTitle = notification.querySelector('.notification-content h4');
+            const notificationContent = notification.querySelector('.notification-content p');
+            
+            notificationTitle.textContent = title;
+            notificationContent.textContent = message;
+            
+            // Закрыть предыдущее уведомление
+            if (notification.classList.contains('active')) {
+                notification.classList.remove('active');
+                notification.classList.add('closing');
+                setTimeout(() => {
+                    notification.classList.remove('closing');
+                }, 300);
+            }
+            
+            // Показать новое уведомление
+            setTimeout(() => {
+                notification.classList.add('active');
+            }, 350);
+            
+            // Автоматическое закрытие
+            setTimeout(() => {
+                if (notification.classList.contains('active')) {
+                    notification.classList.remove('active');
+                    notification.classList.add('closing');
+                    setTimeout(() => {
+                        notification.classList.remove('closing');
+                    }, 300);
+                }
+            }, 4000);
+        }
+        
+        // ЛОАДЕР
+        function showLoader(duration = 300) {
+            const loader = document.getElementById('loader');
+            loader.classList.add('active');
+            
+            setTimeout(() => {
+                loader.classList.remove('active');
+            }, duration);
+        }
+        
+        // МЕНЮ ПУСК
+        function toggleStartMenu() {
+            const startMenu = document.getElementById('start-menu');
+            startMenu.classList.toggle('active');
+        }
+        
+        // Закрыть меню "Пуск" при клике вне его
+        document.addEventListener('click', function(event) {
+            const startMenu = document.getElementById('start-menu');
+            const startButton = document.getElementById('start-button');
+            
+            if (!startMenu.contains(event.target) && !startButton.contains(event.target)) {
+                startMenu.classList.remove('active');
+            }
+        });
+        
+        // УПРАВЛЕНИЕ ОКНАМИ
+        function openWindow(windowId) {
+            // Показать лоадер
+            showLoader(300);
+            
+            // Закрыть меню "Пуск"
+            document.getElementById('start-menu').classList.remove('active');
+            
+            // Если окно уже открыто, переключиться на него
+            const windowElement = document.getElementById(`${windowId}-window`);
+            if (windowElement && windowElement.classList.contains('active')) {
+                // Поднять окно на передний план
+                windowElement.style.zIndex = ++zIndex;
+                return;
+            }
+            
+            // Открыть выбранное окно
+            setTimeout(() => {
+                if (windowElement) {
+                    windowElement.style.display = 'flex';
+                    windowElement.classList.add('active');
+                    windowElement.style.zIndex = ++zIndex;
+                    activeWindow = windowId;
+                    openWindows[windowId] = true;
+                    
+                    // Добавить в панель задач
+                    addToTaskbar(windowId);
+                } else {
+                    showNotification(`Приложение "${windowId}" не найдено`, 'Ошибка');
+                }
+            }, 350);
+        }
+        
+        function closeWindow(windowId) {
+            const windowElement = document.getElementById(`${windowId}-window`);
+            if (windowElement) {
+                // Анимация закрытия
+                windowElement.classList.add('closing');
+                windowElement.classList.remove('active');
+                
+                setTimeout(() => {
+                    windowElement.style.display = 'none';
+                    windowElement.classList.remove('closing');
+                    delete openWindows[windowId];
+                    
+                    // Удалить из панели задач
+                    removeFromTaskbar(windowId);
+                    
+                    if (activeWindow === windowId) {
+                        activeWindow = null;
+                    }
+                }, 300);
+            }
+        }
+        
+        function minimizeWindow(windowId) {
+            const windowElement = document.getElementById(`${windowId}-window`);
+            if (windowElement) {
+                // Анимация сворачивания
+                windowElement.style.opacity = '0';
+                windowElement.style.transform = 'scale(0.9) translateY(20px)';
+                
+                setTimeout(() => {
+                    windowElement.style.display = 'none';
+                    windowElement.classList.remove('active');
+                    windowElement.style.opacity = '';
+                    windowElement.style.transform = '';
+                    
+                    // Убрать активный статус в панели задач
+                    const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+                    if (taskbarItem) {
+                        taskbarItem.classList.remove('active');
+                    }
+                }, 300);
+            }
+        }
+        
+        function maximizeWindow(windowId) {
+            const windowElement = document.getElementById(`${windowId}-window`);
+            if (windowElement) {
+                if (windowElement.style.width === '100%' && windowElement.style.height === 'calc(100% - 48px)') {
+                    // Восстановить размер
+                    windowElement.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    windowElement.style.width = '';
+                    windowElement.style.height = '';
+                    windowElement.style.top = '';
+                    windowElement.style.left = '';
+                    windowElement.style.borderRadius = '10px';
+                } else {
+                    // Развернуть на весь экран
+                    windowElement.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    windowElement.style.width = '100%';
+                    windowElement.style.height = 'calc(100% - 48px)';
+                    windowElement.style.top = '0';
+                    windowElement.style.left = '0';
+                    windowElement.style.borderRadius = '0';
+                }
+            }
+        }
+        
+        function closeAllWindows() {
+            for (let windowId in openWindows) {
+                minimizeWindow(windowId);
+            }
+        }
+        
+        // ПАНЕЛЬ ЗАДАЧ
+        function addToTaskbar(windowId) {
+            const taskbarItems = document.getElementById('taskbar-items');
+            const windowNames = {
+                'system': 'Этот компьютер',
+                'documents': 'Документы',
+                'browser': 'Интернет Explorer',
+                'media': 'Медиа проигрыватель',
+                'vladik': 'Владик',
+                'control-panel': 'Панель управления',
+                'trash': 'Корзина',
+                'calculator': 'Калькулятор',
+                'notepad': 'Блокнот',
+                'help': 'Справка'
+            };
+            
+            // Проверить, нет ли уже этого приложения в панели задач
+            const existingItem = document.getElementById(`taskbar-${windowId}`);
+            if (existingItem) {
+                existingItem.classList.add('active');
+                return;
+            }
+            
+            const taskbarItem = document.createElement('div');
+            taskbarItem.className = 'taskbar-item';
+            taskbarItem.id = `taskbar-${windowId}`;
+            taskbarItem.innerHTML = `<i class="fas fa-window-maximize"></i> ${windowNames[windowId] || windowId}`;
+            taskbarItem.onclick = () => {
+                // Переключить окно
+                const windowElement = document.getElementById(`${windowId}-window`);
+                if (windowElement.style.display === 'none' || !windowElement.classList.contains('active')) {
+                    openWindow(windowId);
+                } else {
+                    minimizeWindow(windowId);
+                }
+            };
+            
+            taskbarItems.appendChild(taskbarItem);
+            taskbarItem.classList.add('active');
+        }
+        
+        function removeFromTaskbar(windowId) {
+            const taskbarItem = document.getElementById(`taskbar-${windowId}`);
+            if (taskbarItem) {
+                taskbarItem.remove();
+            }
+        }
+        
+        // ИНИЦИАЛИЗАЦИЯ ОБРАБОТЧИКОВ СОБЫТИЙ
+        function initEventHandlers() {
+            // Ярлыки на рабочем столе
+            document.querySelectorAll('.desktop-icon').forEach(icon => {
+                icon.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const windowId = this.getAttribute('data-window');
+                    if (windowId) {
+                        openWindow(windowId);
+                    }
+                });
+            });
+            
+            // Приложения в меню Пуск
+            document.querySelectorAll('.start-app').forEach(app => {
+                app.addEventListener('click', function() {
+                    const windowId = this.getAttribute('data-window');
+                    if (windowId) {
+                        openWindow(windowId);
+                    }
+                });
+            });
+            
+            // Ссылки в меню Пуск
+            document.querySelectorAll('.start-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const windowId = this.getAttribute('data-window');
+                    const action = this.getAttribute('data-action');
+                    
+                    if (windowId) {
+                        openWindow(windowId);
+                    } else if (action) {
+                        handleStartAction(action);
+                    }
+                });
+            });
+            
+            // Контекстное меню
+            document.querySelectorAll('.context-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const action = this.getAttribute('data-action');
+                    handleContextAction(action);
+                });
+            });
+            
+            // Контекстное меню рабочего стола
+            document.getElementById('desktop-area').addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                
+                const contextMenu = document.getElementById('context-menu');
+                contextMenu.style.left = e.clientX + 'px';
+                contextMenu.style.top = e.clientY + 'px';
+                contextMenu.classList.add('active');
+                
+                // Закрыть меню при клике вне его
+                setTimeout(() => {
+                    document.addEventListener('click', function closeContextMenu() {
+                        contextMenu.classList.remove('active');
+                        document.removeEventListener('click', closeContextMenu);
+                    });
+                }, 100);
+            });
+            
+            // Снять выделение с иконок при клике на рабочий стол
+            document.getElementById('desktop-area').addEventListener('click', function(e) {
+                if (e.target === this || e.target.classList.contains('desktop-context')) {
+                    document.querySelectorAll('.desktop-icon').forEach(i => i.classList.remove('selected'));
+                }
+            });
+        }
+        
+        // ОБРАБОТКА ДЕЙСТВИЙ
+        function handleStartAction(action) {
+            switch(action) {
+                case 'photos':
+                    showNotification('Загрузка фотографий...', 'Изображения');
+                    break;
+                case 'search':
+                    showNotification('Поиск по системе...', 'Поиск');
+                    break;
+                case 'shutdown':
+                    showNotification('Система завершает работу...', 'Завершение работы');
+                    break;
+                case 'restart':
+                    showNotification('Система перезагружается...', 'Перезагрузка');
+                    break;
+                case 'logout':
+                    showNotification('Выход из системы...', 'Выход');
+                    break;
+                default:
+                    showNotification(`Действие "${action}" выполнено`, 'Система');
+            }
+        }
+        
+        function handleContextAction(action) {
+            switch(action) {
+                case 'new-file':
+                    showNotification('Создание нового файла...', 'Контекстное меню');
+                    openWindow('notepad');
+                    break;
+                case 'refresh':
+                    showNotification('Обновление рабочего стола...', 'Контекстное меню');
+                    break;
+                case 'personalize':
+                    showNotification('Открытие персонализации...', 'Контекстное меню');
+                    openWindow('control-panel');
+                    break;
+                case 'view':
+                    showNotification('Изменение вида значков...', 'Контекстное меню');
+                    break;
+                case 'sort':
+                    showNotification('Сортировка значков по имени...', 'Контекстное меню');
+                    break;
+                case 'settings':
+                    showNotification('Открытие параметров системы...', 'Контекстное меню');
+                    openWindow('system');
+                    break;
+            }
+        }
+        
+        // КАЛЬКУЛЯТОР
+        function initCalculator() {
+            document.querySelectorAll('.calc-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const value = this.getAttribute('data-val');
+                    handleCalcInput(value);
+                });
+            });
+        }
+        
+        function handleCalcInput(value) {
+            const display = document.getElementById('calc-display');
+            
+            if (value === 'C') {
+                // Очистка
+                currentCalcValue = '0';
+                calcOperator = null;
+                calcPreviousValue = null;
+                display.value = currentCalcValue;
+            } else if (value === '±') {
+                // Смена знака
+                currentCalcValue = (parseFloat(currentCalcValue) * -1).toString();
+                display.value = currentCalcValue;
+            } else if (value === '%') {
+                // Процент
+                currentCalcValue = (parseFloat(currentCalcValue) / 100).toString();
+                display.value = currentCalcValue;
+            } else if (value === '+' || value === '-' || value === '*' || value === '/') {
+                // Оператор
+                if (calcPreviousValue === null) {
+                    calcPreviousValue = currentCalcValue;
+                } else if (calcOperator) {
+                    calcPreviousValue = calculate(calcPreviousValue, currentCalcValue, calcOperator);
+                    display.value = calcPreviousValue;
+                }
+                calcOperator = value;
+                currentCalcValue = '0';
+            } else if (value === '=') {
+                // Равно
+                if (calcOperator && calcPreviousValue !== null) {
+                    currentCalcValue = calculate(calcPreviousValue, currentCalcValue, calcOperator);
+                    display.value = currentCalcValue;
+                    calcOperator = null;
+                    calcPreviousValue = null;
+                }
+            } else if (value === '.') {
+                // Точка
+                if (!currentCalcValue.includes('.')) {
+                    currentCalcValue += '.';
+                    display.value = currentCalcValue;
+                }
+            } else {
+                // Цифра
+                if (currentCalcValue === '0' || currentCalcValue === 'Error') {
+                    currentCalcValue = value;
+                } else {
+                    currentCalcValue += value;
+                }
+                display.value = currentCalcValue;
+            }
+        }
+        
+        function calculate(a, b, operator) {
+            const numA = parseFloat(a);
+            const numB = parseFloat(b);
+            
+            switch(operator) {
+                case '+': return (numA + numB).toString();
+                case '-': return (numA - numB).toString();
+                case '*': return (numA * numB).toString();
+                case '/': 
+                    if (numB === 0) return 'Error';
+                    return (numA / numB).toString();
+                default: return b;
+            }
+        }
+        
+        // ПЕРЕТАСКИВАЕМЫЕ ОКНА
+        function initDraggableWindows() {
+            document.querySelectorAll('.window').forEach(windowElement => {
+                const header = windowElement.querySelector('.window-header');
+                let isDragging = false;
+                let currentX, currentY, initialX, initialY;
+                
+                header.addEventListener('mousedown', function(e) {
+                    initialX = e.clientX - windowElement.offsetLeft;
+                    initialY = e.clientY - windowElement.offsetTop;
+                    
+                    if (e.target === header || header.contains(e.target)) {
+                        isDragging = true;
+                        
+                        // Поднять окно на передний план
+                        windowElement.style.zIndex = ++zIndex;
+                        const windowId = windowElement.id.replace('-window', '');
+                        activeWindow = windowId;
+                        
+                        document.addEventListener('mousemove', drag);
+                        document.addEventListener('mouseup', dragEnd);
+                    }
+                });
+                
+                function drag(e) {
+                    if (isDragging) {
+                        e.preventDefault();
+                        currentX = e.clientX - initialX;
+                        currentY = e.clientY - initialY;
+                        
+                        // Ограничить перемещение окна в пределах рабочего стола
+                        const desktop = document.querySelector('.desktop-area');
+                        const maxX = desktop.offsetWidth - windowElement.offsetWidth;
+                        const maxY = desktop.offsetHeight - windowElement.offsetHeight;
+                        
+                        currentX = Math.max(0, Math.min(currentX, maxX));
+                        currentY = Math.max(0, Math.min(currentY, maxY));
+                        
+                        windowElement.style.left = currentX + 'px';
+                        windowElement.style.top = currentY + 'px';
+                    }
+                }
+                
+                function dragEnd() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', drag);
+                    document.removeEventListener('mouseup', dragEnd);
+                }
+            });
+        }
+        
+        // Анимация плавающей иконки Владика
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-10px); }
+            }
+            
+            .browser-btn {
+                background: #f8f9fa;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 8px 15px;
+                cursor: pointer;
+                margin-right: 10px;
+                transition: all 0.2s;
+            }
+            
+            .browser-btn:hover {
+                background: #e9ecef;
+                transform: scale(1.05);
+            }
+            
+            .browser-btn.go {
+                background: #4a69bd;
+                color: white;
+                border: none;
+            }
+            
+            .browser-btn.go:hover {
+                background: #3a59ad;
+            }
+            
+            .media-btn {
+                background: #4a69bd;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                font-size: 20px;
+                cursor: pointer;
+                margin: 0 10px;
+                transition: all 0.2s;
+            }
+            
+            .media-btn:hover {
+                transform: scale(1.1);
+                background: #3a59ad;
+            }
+            
+            .media-btn.play {
+                background: #ff6b6b;
+                width: 70px;
+                height: 70px;
+                font-size: 24px;
+            }
+            
+            .media-btn.play:hover {
+                background: #ee5a52;
+            }
+            
+            .vladik-card {
+                background: white;
+                border-radius: 8px;
+                padding: 15px;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+                cursor: pointer;
+                transition: all 0.3s;
+            }
+            
+            .vladik-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }
+            
+            .vladik-activate-btn {
+                margin-top: 30px;
+                padding: 12px 25px;
+                background: linear-gradient(to right, #ff6b6b 0%, #ee5a52 100%);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                font-weight: bold;
+                cursor: pointer;
+                font-size: 16px;
+                transition: all 0.3s;
+            }
+            
+            .vladik-activate-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
